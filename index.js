@@ -59,6 +59,12 @@ async function run() {
       const result = await allServiceCollections.find(query).toArray();
       res.send(result);
     });
+    // get booking with email
+    app.get("/myBooking/:email", async (req, res) => {
+      const query = { userEmail: req.params.email };
+      const result = await allBookingCollections.find(query).toArray();
+      res.send(result);
+    });
     // Update service
     app.put("/allServices/:id", async (req, res) => {
       const id = req.params.id;
