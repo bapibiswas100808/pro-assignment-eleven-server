@@ -59,6 +59,28 @@ async function run() {
       const result = await allServiceCollections.find(query).toArray();
       res.send(result);
     });
+    // Update service
+    app.put("/allServices/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedService = req.body;
+      const updateService = {
+        $set: {
+          photo: updatedService.photo,
+          price: updatedService.price,
+          serviceName: updatedService.serviceName,
+          serviceArea: updatedService.serviceArea,
+          description: updatedService.description,
+        },
+      };
+      const result = await allServiceCollections.updateOne(
+        filter,
+        updateService,
+        options
+      );
+      res.send(result);
+    });
 
     // post service
     app.post("/allServices", async (req, res) => {
