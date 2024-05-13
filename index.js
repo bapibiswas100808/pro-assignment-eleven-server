@@ -53,6 +53,12 @@ async function run() {
       const result = await allServiceCollections.findOne(query);
       res.send(result);
     });
+    // get service with email
+    app.get("/myService/:email", async (req, res) => {
+      const query = { providerEmail: req.params.email };
+      const result = await allServiceCollections.find(query).toArray();
+      res.send(result);
+    });
 
     // post service
     app.post("/allServices", async (req, res) => {
