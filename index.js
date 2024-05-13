@@ -31,13 +31,22 @@ async function run() {
       .db("allManagementServices")
       .collection("allServices");
 
-    // Get
+    const allBookingCollections = client
+      .db("allManagementServices")
+      .collection("allBookings");
+    // Get service
     app.get("/allServices", async (req, res) => {
       const cursor = allServiceCollections.find();
       const result = await cursor.toArray();
       res.send(result);
     });
-    // get with id
+    // Get booking
+    app.get("/allBookings", async (req, res) => {
+      const cursor = allBookingCollections.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    // get service with id
     app.get("/allServices/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -45,11 +54,16 @@ async function run() {
       res.send(result);
     });
 
-    // post
+    // post service
     app.post("/allServices", async (req, res) => {
       const newData = req.body;
-      console.log(newData);
       const result = await allServiceCollections.insertOne(newData);
+      res.send(result);
+    });
+    // post booking
+    app.post("/allBookings", async (req, res) => {
+      const newData = req.body;
+      const result = await allBookingCollections.insertOne(newData);
       res.send(result);
     });
     // Send a ping to confirm a successful connection
