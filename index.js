@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
@@ -18,6 +19,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
 // source code
 
@@ -31,6 +33,17 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
+
+// logger middleware
+const logger = (req, res, next) => {
+  console.log("log info:", req.method, req.url);
+  next();
+};
+
+// verify token
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
+};
 
 async function run() {
   try {
@@ -46,7 +59,7 @@ async function run() {
       .collection("allBookings");
 
     // Auth Api
-    app.post("/jwt", async (req, res) => {
+    app.post("/jwt", logger, async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
@@ -74,32 +87,32 @@ async function run() {
       res.send(result);
     });
     // Get booking
-    app.get("/allBookings", async (req, res) => {
+    app.get("/allBookings", logger, async (req, res) => {
       const cursor = allBookingCollections.find();
       const result = await cursor.toArray();
       res.send(result);
     });
     // get service with id
-    app.get("/allServices/:id", async (req, res) => {
+    app.get("/allServices/:id", logger, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await allServiceCollections.findOne(query);
       res.send(result);
     });
     // get service with email
-    app.get("/myService/:email", async (req, res) => {
+    app.get("/myService/:email", logger, async (req, res) => {
       const query = { providerEmail: req.params.email };
       const result = await allServiceCollections.find(query).toArray();
       res.send(result);
     });
     // get booking with email
-    app.get("/myBooking/:email", async (req, res) => {
+    app.get("/myBooking/:email", logger, async (req, res) => {
       const query = { userEmail: req.params.email };
       const result = await allBookingCollections.find(query).toArray();
       res.send(result);
     });
     // Update service
-    app.put("/allServices/:id", async (req, res) => {
+    app.put("/allServices/:id", logger, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
@@ -122,7 +135,7 @@ async function run() {
     });
 
     // Delete Service
-    app.delete("/allServices/:id", async (req, res) => {
+    app.delete("/allServices/:id", logger, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await allServiceCollections.deleteOne(query);
@@ -130,13 +143,13 @@ async function run() {
     });
 
     // post service
-    app.post("/allServices", async (req, res) => {
+    app.post("/allServices", logger, async (req, res) => {
       const newData = req.body;
       const result = await allServiceCollections.insertOne(newData);
       res.send(result);
     });
     // post booking
-    app.post("/allBookings", async (req, res) => {
+    app.post("/allBookings", logger, async (req, res) => {
       const newData = req.body;
       const result = await allBookingCollections.insertOne(newData);
       res.send(result);
