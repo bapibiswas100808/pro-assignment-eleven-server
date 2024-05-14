@@ -11,6 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
+      "http://localhost:5173",
       "http://localhost:5174",
       "https://pro-assignment-eleven.web.app",
       "https://pro-assignment-eleven.firebaseapp.com",
@@ -54,11 +55,16 @@ const verifyToken = (req, res, next) => {
     next();
   });
 };
+const cookieOption = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+  secure: process.env.NODE_ENV === "production" ? true : false,
+};
 
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const allServiceCollections = client
       .db("allManagementServices")
@@ -75,19 +81,15 @@ async function run() {
         expiresIn: "1h",
       });
 
-      res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-        })
-        .send({ success: true });
+      res.cookie("token", token, cookieOption).send({ success: true });
     });
 
     // Auth clear cookies
     app.post("/logOut", async (req, res) => {
       const user = req.body;
-      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
+      res
+        .clearCookie("token", { ...cookieOption, maxAge: 0 })
+        .send({ success: true });
     });
 
     // Get service
@@ -149,6 +151,22 @@ async function run() {
       );
       res.send(result);
     });
+    // Update Booking
+    app.patch("/allBookings/:id", logger, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedBooking = req.body;
+      const updateBooking = {
+        $set: {
+          status: updatedBooking.status,
+        },
+      };
+      const result = await allBookingCollections.updateOne(
+        filter,
+        updateBooking
+      );
+      res.send(result);
+    });
 
     // Delete Service
     app.delete("/allServices/:id", logger, async (req, res) => {
@@ -171,7 +189,7 @@ async function run() {
       res.send(result);
     });
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
