@@ -10,8 +10,9 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "https://pro-assignment-eleven.web.app/",
-      "https://pro-assignment-eleven.firebaseapp.com/",
+      "http://localhost:5174",
+      "https://pro-assignment-eleven.web.app",
+      "https://pro-assignment-eleven.firebaseapp.com",
     ],
     credentials: true,
   })
@@ -50,7 +51,14 @@ async function run() {
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
-      res.send({ token });
+
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        })
+        .send({ success: true });
     });
 
     // Get service
