@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
@@ -42,6 +43,12 @@ async function run() {
     const allBookingCollections = client
       .db("allManagementServices")
       .collection("allBookings");
+
+    // Auth Api
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+    });
+
     // Get service
     app.get("/allServices", async (req, res) => {
       const cursor = allServiceCollections.find();
