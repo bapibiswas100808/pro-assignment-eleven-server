@@ -6,7 +6,15 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middle ware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://pro-assignment-eleven.web.app/",
+      "https://pro-assignment-eleven.firebaseapp.com/",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // source code
